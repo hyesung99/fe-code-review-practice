@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAtomValue, useSetAtom } from "jotai";
-import { useSuspenseGetProductList } from "../queries/products";
+import { useTodayProducts } from "../hooks/useTodayProducts";
 import { ProductGrid } from "./ProductGrid";
 import { useNavigate } from "react-router-dom";
 import { userAtom } from "../atoms/user";
@@ -15,12 +15,7 @@ type TodayProductProps = {
 
 export const TodayProduct = ({ keyword, category }: TodayProductProps) => {
   const [page, setPage] = useState(1);
-  const { data } = useSuspenseGetProductList(
-    4,
-    keyword,
-    page,
-    category === "전체" ? undefined : category
-  );
+  const { products, totalPage } = useTodayProducts({ keyword, category, page });
   const navigate = useNavigate();
   const user = useAtomValue(userAtom);
   const setCartCount = useSetAtom(cartCountAtom);
@@ -31,12 +26,10 @@ export const TodayProduct = ({ keyword, category }: TodayProductProps) => {
     alert("장바구니에 담았어요");
   };
 
-  const totalPage = Math.ceil(data.totalCount / 4);
-
   return (
     <>
       <ProductGrid
-        products={data.items}
+        products={products}
         isLogin={user.isLogin}
         onAddToCart={handleAddToCart}
         onClickProduct={(id) => navigate(`/products/${id}`)}

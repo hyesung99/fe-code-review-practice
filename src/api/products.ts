@@ -1,7 +1,7 @@
 import { db } from './db';
 import { mockRequest } from './client';
 
-type GetProductsParams = {
+export type GetProductsParams = {
   page: number;
   size: number;
   keyword: string;
