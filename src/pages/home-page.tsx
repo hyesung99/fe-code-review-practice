@@ -6,9 +6,9 @@ import { addToCart } from "../api/cart";
 import { cartCountAtom } from "../atoms/cart";
 import { userAtom } from "../atoms/user";
 import { Input } from "../components/ui/input";
-import { Button } from "../components/ui/button";
 import { ProductGrid } from "../components/ProductGrid";
 import { Pagination } from "../components/ui/pagination";
+import { Chip } from "../components/ui/chip";
 const categories = ["전체", "식품", "생활", "가전", "패션"];
 
 export default function HomePage() {
@@ -58,20 +58,19 @@ export default function HomePage() {
         className="mb-3"
       />
 
-      <div className="flex gap-2 mb-4">
-        {categories.map((c) => (
-          <Button
-            key={c}
-            variant={category === c ? "primary" : "secondary"}
-            onClick={() => {
-              setCategory(c);
-              setPage(1);
-            }}
-          >
-            {c}
-          </Button>
+      <Chip.Group
+        value={category}
+        onValueChange={(category) => {
+          setCategory(category);
+          setPage(1);
+        }}
+      >
+        {categories.map((category) => (
+          <Chip.Item key={category} value={category}>
+            {category}
+          </Chip.Item>
         ))}
-      </div>
+      </Chip.Group>
 
       <ProductGrid
         products={data!.items}
