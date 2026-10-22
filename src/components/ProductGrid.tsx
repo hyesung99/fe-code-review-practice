@@ -1,24 +1,28 @@
-import type { Product } from '../api/db';
-import { ProductCard } from './ProductCard';
+import type { ReactNode } from "react";
+import type { Product } from "../api/db";
+import { ProductCard } from "./ProductCard";
 
 type ProductGridProps = {
   products: Product[];
-  isLogin: boolean;
-  onAddToCart: (productId: string) => void;
   onClickProduct: (productId: string) => void;
+  renderAction?: (product: Product) => ReactNode;
 };
 
-export function ProductGrid({ products, isLogin, onAddToCart, onClickProduct }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  onClickProduct,
+  renderAction,
+}: ProductGridProps) {
   return (
     <div className="grid grid-cols-2 gap-3">
       {products.map((product) => (
         <ProductCard
           key={product.id}
           product={product}
-          isLogin={isLogin}
-          onAddToCart={onAddToCart}
           onClickProduct={onClickProduct}
-        />
+        >
+          {renderAction?.(product)}
+        </ProductCard>
       ))}
     </div>
   );

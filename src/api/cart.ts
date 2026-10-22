@@ -10,15 +10,27 @@ export function getCart() {
   );
 }
 
-export function addToCart(productId: string, quantity: number) {
-  return mockRequest(() => {
+export type AddToCartErrorCode = 'UNAUTHORIZED' | 'OUT_OF_STOCK';
+
+export type AddToCartResponse = { ok: true } | { ok: false; code: AddToCartErrorCode };
+
+// isLogin은 실제 서버라면 요청에 실려 가는 인증 토큰의 역할
+export function addToCart(productId: string, quantity: number, { isLogin }: { isLogin: boolean }) {
+  return mockRequest((): AddToCartResponse => {
+    if (!isLogin) {
+      return { ok: false, code: 'UNAUTHORIZED' };
+    }
+    const product = db.products.find((product) => product.id === productId);
+    if (!product || product.stock === 0) {
+      return { ok: false, code: 'OUT_OF_STOCK' };
+    }
     const existing = db.cart.find((item) => item.productId === productId);
     if (existing) {
       existing.quantity += quantity;
     } else {
       db.cart.push({ productId, quantity });
     }
-    return true;
+    return { ok: true };
   });
 }
 
