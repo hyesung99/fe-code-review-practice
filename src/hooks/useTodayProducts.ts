@@ -1,13 +1,10 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { productQueries } from "../queries/products";
+import { GetProductsParams } from "../api/products";
 
-const PAGE_SIZE = 4;
+const TODAY_PRODUCTS_PAGE_SIZE = 4;
 
-type UseTodayProductsParams = {
-  keyword: string;
-  category: string;
-  page: number;
-};
+type UseTodayProductsParams = Omit<GetProductsParams, "size">;
 
 /**
  * 오늘의 상품 목록을 조회하는 훅
@@ -25,14 +22,14 @@ export function useTodayProducts({
   const { items, totalCount } = useSuspenseQuery(
     productQueries.list({
       page,
-      size: PAGE_SIZE,
+      size: TODAY_PRODUCTS_PAGE_SIZE,
       keyword,
-      category: category === "전체" ? undefined : category,
+      category: category === "전체" ? null : category,
     })
   ).data;
 
   return {
     products: items,
-    totalPage: Math.ceil(totalCount / PAGE_SIZE),
+    totalPage: Math.ceil(totalCount / TODAY_PRODUCTS_PAGE_SIZE),
   };
 }
