@@ -1,13 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useAtomValue, useSetAtom } from 'jotai';
 import { useGetProduct } from '../queries/products';
 import { useGetReviews } from '../queries/reviews';
-import { addToCart } from '../api/cart';
 import { getRelatedProducts } from '../api/products';
 import type { Product } from '../api/db';
-import { cartCountAtom } from '../atoms/cart';
-import { userAtom } from '../atoms/user';
+import { useAddToCart } from '../queries/cart';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { ProductCard } from '../components/ProductCard';
@@ -15,8 +12,7 @@ import { ProductCard } from '../components/ProductCard';
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const user = useAtomValue(userAtom);
-  const setCartCount = useSetAtom(cartCountAtom);
+  const { mutate: addToCart, isPending: isAddingToCart } = useAddToCart();
   const [quantity, setQuantity] = useState(1);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
 
@@ -29,20 +25,18 @@ export default function ProductDetailPage() {
     }
   }, [product]);
 
-  const handleAddToCart = async () => {
-    if (!user.isLogin) {
-      alert('로그인이 필요해요');
-      return;
-    }
-    if (product!.stock == 0) {
-      alert('품절된 상품이에요');
-      return;
-    }
-    await addToCart(product!.id, quantity);
-    setCartCount((prev) => prev + quantity);
-    if (confirm('장바구니에 담았어요. 장바구니로 이동할까요?')) {
-      navigate('/cart');
-    }
+  const handleAddToCart = () => {
+    addToCart(
+      { productId: product!.id, quantity },
+      {
+        onSuccess: () => {
+          if (confirm('장바구니에 담았어요. 장바구니로 이동할까요?')) {
+            navigate('/cart');
+          }
+        },
+        onError: (error) => alert(error.message),
+      },
+    );
   };
 
   if (isLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -69,7 +63,7 @@ export default function ProductDetailPage() {
         <Button variant="secondary" onClick={() => setQuantity(quantity + 1)}>
           +
         </Button>
-        <Button className="flex-1" onClick={handleAddToCart}>
+        <Button className="flex-1" onClick={handleAddToCart} disabled={isAddingToCart}>
           {(product!.price * quantity).toLocaleString()}원 장바구니 담기
         </Button>
       </div>
@@ -107,8 +101,6 @@ export default function ProductDetailPage() {
             <ProductCard
               key={p.id}
               product={p}
-              isLogin={false}
-              onAddToCart={() => {}}
               onClickProduct={(productId) => navigate(`/products/${productId}`)}
             />
           ))}

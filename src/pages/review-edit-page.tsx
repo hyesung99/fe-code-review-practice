@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { useAtomValue } from 'jotai';
-import { useCreateReview, useGetReview, useUpdateReview } from '../queries/reviews';
+import { reviewQueries, useCreateReview, useGetReview, useUpdateReview } from '../queries/reviews';
 import { userAtom } from '../atoms/user';
 import { queryClient } from '../lib/query-client';
 import { Button } from '../components/ui/button';
@@ -64,7 +64,7 @@ export default function ReviewEditPage() {
         { productId: productId!, author: user.name, rating: Number(formData.rating), content: formData.content },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['reviews', productId] });
+            queryClient.invalidateQueries({ queryKey: reviewQueries.list(productId!).queryKey });
             navigate(-1);
           },
         },
@@ -74,7 +74,7 @@ export default function ReviewEditPage() {
         { ...review!, rating: Number(formData.rating), content: formData.content },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['getReview', reviewId] });
+            queryClient.invalidateQueries({ queryKey: reviewQueries.detail(reviewId!).queryKey });
             navigate(-1);
           },
         },

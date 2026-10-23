@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetCart, useRemoveCartItem, useUpdateCartItem } from '../queries/cart';
+import { cartQueries, useGetCart, useRemoveCartItem, useUpdateCartItem } from '../queries/cart';
 import { checkout } from '../api/cart';
 import { useCartSummary } from '../hooks/useCartSummary';
 import { queryClient } from '../lib/query-client';
@@ -55,7 +55,7 @@ export default function CartPage() {
     if (pendingRemoveId) {
       removeCartItem.mutate(pendingRemoveId, {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['cart'] });
+          queryClient.invalidateQueries({ queryKey: cartQueries.all() });
         },
       });
       setShowRemoveDialog(false);
