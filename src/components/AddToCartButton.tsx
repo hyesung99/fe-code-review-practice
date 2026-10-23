@@ -1,20 +1,29 @@
+import { ComponentProps, MouseEvent } from "react";
 import type { Product } from "../api/db";
 import { useAddToCart } from "../queries/cart";
 import { Button } from "./ui/button";
 
 type AddToCartButtonProps = {
   product: Product;
-};
+  onAdded?: () => void;
+  onAddFailed?: (error: Error) => void;
+} & ComponentProps<typeof Button>;
 
-export const AddToCartButton = ({ product }: AddToCartButtonProps) => {
+export const AddToCartButton = ({
+  product,
+  onAdded,
+  onAddFailed,
+  children = "담기",
+  ...props
+}: AddToCartButtonProps) => {
   const { mutate: addToCart, isPending } = useAddToCart();
 
   const handleClick = () => {
     addToCart(
       { productId: product.id },
       {
-        onSuccess: () => alert("장바구니에 담았어요"),
-        onError: (error) => alert(error.message),
+        onSuccess: () => onAdded?.(),
+        onError: (error) => onAddFailed?.(error),
       }
     );
   };
@@ -25,8 +34,9 @@ export const AddToCartButton = ({ product }: AddToCartButtonProps) => {
       className="w-full mt-2"
       onClick={handleClick}
       disabled={isPending}
+      {...props}
     >
-      담기
+      {children}
     </Button>
   );
 };

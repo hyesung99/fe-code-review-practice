@@ -30,7 +30,13 @@ export const TodayProduct = ({ keyword, category }: TodayProductProps) => {
         onClickProduct={(id) => navigateToProductDetail(id)}
         renderAction={(product) =>
           isLogin &&
-          !isSoldOut(product) && <AddToCartButton product={product} />
+          !isSoldOut(product) && (
+            <AddToCartButton
+              product={product}
+              onAdded={() => alert("장바구니에 담았어요")}
+              onAddFailed={(error) => alert(error.message)}
+            />
+          )
         }
       />
 
